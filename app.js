@@ -8,17 +8,17 @@ const listname = 'List with members';
 function createList() {
   let err, success;
   return new Promise(function(resolve, reject) {
-    err = (err, response) => {
+    err = (err) => {
       reject(new Error(`Failed to create list: ${err}`));
     };
 
     // return the list id if the request is successful
     success = data => {
-      let {id: listid, slug : slug} = JSON.parse(data);
+      let { id_str: listid, slug: slug } = JSON.parse(data);
       console.log(`${listname} was successfully added`);
       console.log(`List ID is ${listid}`);
       console.log(`The slug is ${slug}`);
-      resolve({id: listid, slug: slug, name: listname});
+      resolve({ id: listid, slug: slug, name: listname });
     };
 
     // create the list
@@ -29,16 +29,21 @@ function createList() {
 // Populate the list with new names
 function populateList(list) {
   console.log(list);
-  let err = (err, response) => {
+  let err = (err) => {
     console.log(err);
   };
 
   let success = data => {
-    console.log(JSON.stringify(JSON.parse(data),null,2));
+    console.log(JSON.stringify(JSON.parse(data), null, 2));
   };
 
   twitter.postListMembers(
-    { name: list.name, list_id: list.id, slug: list.slug, user_id: ['112541479'] },
+    {
+      name: list.name,
+      list_id: list.id,
+      slug: list.slug,
+      screen_name: ['justintemps']
+    },
     err,
     success
   );
