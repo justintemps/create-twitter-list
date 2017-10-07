@@ -1,5 +1,6 @@
 const Twitter = require('twitter-node-client').Twitter;
 const config = require('./data/twitter_config.json');
+const screen_names = require('./data/screen_names.json');
 
 const twitter = new Twitter(config);
 const listname = 'List with members';
@@ -8,16 +9,14 @@ const listname = 'List with members';
 function createList() {
   let err, success;
   return new Promise(function(resolve, reject) {
-    err = (err) => {
+    err = err => {
       reject(new Error(`Failed to create list: ${err}`));
     };
 
     // return the list id if the request is successful
     success = data => {
       let { id_str: listid, slug: slug } = JSON.parse(data);
-      console.log(`${listname} was successfully added`);
-      console.log(`List ID is ${listid}`);
-      console.log(`The slug is ${slug}`);
+      console.log(`${listname} is now a new list on your Twitter account`);
       resolve({ id: listid, slug: slug, name: listname });
     };
 
@@ -27,31 +26,38 @@ function createList() {
 }
 
 // Populate the list with new names
-function populateList(list) {
-  console.log(list);
-  let err = (err) => {
+function populateList(list, members) {
+  let count = 0;
+  let limit = 99;
+  let batch;
+  let err = err => {
     console.log(err);
   };
 
   let success = data => {
-    console.log(JSON.stringify(JSON.parse(data), null, 2));
+    console.log('Batch add was successful');
+    // console.log(JSON.stringify(JSON.parse(data), null, 2));
   };
+
+  batch = members.slice(count, count + limit).map(obj => obj.screen_name.toLowerCase()).toString();
 
   twitter.postListMembers(
     {
       name: list.name,
       list_id: list.id,
       slug: list.slug,
-      screen_name: ['justintemps']
+      screen_name: batch
     },
     err,
     success
   );
+
 }
+
 
 createList()
   .then(list => {
-    populateList(list);
+    populateList(list, screen_names);
   })
   .catch(error => {
     console.log(error);
