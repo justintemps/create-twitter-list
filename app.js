@@ -5,6 +5,17 @@ const screen_names = require('./data/screen_names.json');
 const twitter = new Twitter(config);
 const listname = 'List with members';
 
+/*
+MUST BE ADDED TO twitter_config.json before this will work
+{
+       "consumerKey": "XXXXXXXXXXXXXXXXXXXXXXX",
+       "consumerSecret": "XXXXXXXXXXXXXXXXXXXX",
+       "accessToken": "XXXXXXXXX-XXXXXXXXXXXXX",
+       "accessTokenSecret": "XXXXXXXXXXXXXXXXX",
+       "callBackUrl": "XXXXXXXXXXXXXXXXXXXXXXX"
+}
+*/
+
 // Create a new list
 function createList() {
   let err, success;
@@ -28,15 +39,27 @@ function createList() {
 // Populate the list with new names
 function populateList(list, members) {
   let count = 0;
-  let limit = 99;
+  let limit = 100;
   let batch;
   let err = err => {
+    console.log('Batch add was unsuccessful');
     console.log(err);
   };
 
   let success = data => {
-    console.log('Batch add was successful');
-    // console.log(JSON.stringify(JSON.parse(data), null, 2));
+    console.log('Batch successfully added');
+    count += limit;
+    batch = members.slice(count, count + limit).map(obj => obj.screen_name.toLowerCase()).toString();
+    twitter.postListMembers(
+      {
+        name: list.name,
+        list_id: list.id,
+        slug: list.slug,
+        screen_name: batch
+      },
+      err,
+      success
+    );
   };
 
   batch = members.slice(count, count + limit).map(obj => obj.screen_name.toLowerCase()).toString();
@@ -51,8 +74,8 @@ function populateList(list, members) {
     err,
     success
   );
-
 }
+
 
 
 createList()
